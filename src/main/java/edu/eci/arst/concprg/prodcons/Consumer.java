@@ -6,6 +6,9 @@
 package edu.eci.arst.concprg.prodcons;
 
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,10 +16,10 @@ import java.util.Queue;
  */
 public class Consumer extends Thread{
     
-    private Queue<Integer> queue;
+    private LinkedBlockingQueue<Integer> queue;
     
     
-    public Consumer(Queue<Integer> queue){
+    public Consumer(LinkedBlockingQueue<Integer> queue){
         this.queue=queue;        
     }
     
@@ -25,8 +28,17 @@ public class Consumer extends Thread{
         while (true) {
 
             if (queue.size() > 0) {
-                int elem=queue.poll();
-                System.out.println("Consumer consumes "+elem);                                
+                try {
+                    int elem=queue.take();
+                    System.out.println("Consumer consumes "+elem);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Consumer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
             }
             
         }
