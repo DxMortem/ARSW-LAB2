@@ -26,14 +26,11 @@ public class Consumer extends Thread{
     @Override
     public void run() {
         while (true) {
-
-            if (queue.size() > 0) {
-                try {
-                    int elem=queue.take();
-                    System.out.println("Consumer consumes "+elem);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Consumer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            try {
+                int elem=queue.take();
+                System.out.println("Consumer consumes "+elem);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Consumer.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
                 Thread.sleep(1000);

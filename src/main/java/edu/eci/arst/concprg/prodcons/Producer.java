@@ -40,9 +40,6 @@ public class Producer extends Thread {
             } catch (InterruptedException ex) {
                 Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
             }  
-            synchronized(queue){
-                queue.notify();
-            }
         }
     }
 }
