@@ -8,6 +8,8 @@ package edu.eci.arsw.blacklistvalidator;
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,11 +42,14 @@ public class HostBlackListsValidator {
         int totServers = skds.getRegisteredServersCount();
         int range = totServers/divisiones;
         
+        LinkedBlockingQueue<Integer> queue=new LinkedBlockingQueue<>(this.BLACK_LIST_ALARM_COUNT-1);
+        AtomicInteger total = new AtomicInteger();
+        
         for(int i=0;i<divisiones;i++){
             if(i==divisiones-1){
-                threadlist.add(new ThreadSeeker(ipaddress,i*range,range+(totServers % divisiones)));
+                threadlist.add(new ThreadSeeker(ipaddress,i*range,range+(totServers % divisiones), queue, total));
             }else{
-                threadlist.add(new ThreadSeeker(ipaddress,i*range,range));
+                threadlist.add(new ThreadSeeker(ipaddress,i*range,range, queue, total));
             }
         }
         
