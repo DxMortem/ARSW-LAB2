@@ -19,46 +19,35 @@ public class ThreadSeeker extends Thread {
     private final String ipAddress;
     private final int min;
     private final int tot;
-    private int ocurrencesCount;
+    private AtomicInteger ocurrencesCount;
     private int checkedListsCount;
     private LinkedBlockingQueue<Integer> queue = null;
     private final LinkedList<Integer> blackListOcurrences;
     private final HostBlacklistsDataSourceFacade skds;
-    AtomicInteger total;
     
     
     @Override
     public void run() {
-        synchronized(total){
-            for (int i=min;i<min+tot && total.get() < 5;i++){
-                checkedListsCount++;
-                if (skds.isInBlackListServer(i, ipAddress)){
-                    blackListOcurrences.add(i);
-                    total.addAndGet(1);
-                    /**if(!queue.offer(i)){
-
-                    } **/
-                    ocurrencesCount++;
-                    System.out.println("esto vivo");
-                }
+        int i = min;
+        while (i<min+tot && ocurrencesCount.get()<5){
+            checkedListsCount++;
+            if (skds.isInBlackListServer(i, ipAddress)){
+                blackListOcurrences.add(i);
+                ocurrencesCount.getAndIncrement();
             }
+            i++;
         }
     }
 
-    public ThreadSeeker(String ipAddress, int min, int tot, LinkedBlockingQueue queue, AtomicInteger total) {
+    public ThreadSeeker(String ipAddress, int min, int tot, LinkedBlockingQueue queue, AtomicInteger ocurrencesCount) {
         this.checkedListsCount = 0;
-        this.ocurrencesCount = 0;
+        this.ocurrencesCount = ocurrencesCount;
         this.skds = HostBlacklistsDataSourceFacade.getInstance();
         this.blackListOcurrences = new LinkedList<>();
         this.ipAddress = ipAddress;
         this.min = min;
         this.tot = tot;
         this.queue = queue;
-        this.total = total;
-    }
-
-    public int getOcurrencesCount() {
-        return ocurrencesCount;
     }
 
     public int getCheckedListsCount() {

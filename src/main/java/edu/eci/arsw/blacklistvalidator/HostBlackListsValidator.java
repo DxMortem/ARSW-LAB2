@@ -36,20 +36,19 @@ public class HostBlackListsValidator {
     public List<Integer> checkHost(String ipaddress, int divisiones) throws InterruptedException{
         List<ThreadSeeker> threadlist = new LinkedList<>();
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
-        int ocurrencesCount=0;
+        AtomicInteger ocurrencesCount = new AtomicInteger(0);
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
         int checkedListsCount=0;
         int totServers = skds.getRegisteredServersCount();
         int range = totServers/divisiones;
         
-        LinkedBlockingQueue<Integer> queue=new LinkedBlockingQueue<>(this.BLACK_LIST_ALARM_COUNT-1);
-        AtomicInteger total = new AtomicInteger();
+        LinkedBlockingQueue<Integer> queue=new LinkedBlockingQueue<>(HostBlackListsValidator.BLACK_LIST_ALARM_COUNT-1);
         
         for(int i=0;i<divisiones;i++){
             if(i==divisiones-1){
-                threadlist.add(new ThreadSeeker(ipaddress,i*range,range+(totServers % divisiones), queue, total));
+                threadlist.add(new ThreadSeeker(ipaddress, i*range,range+(totServers % divisiones), queue, ocurrencesCount));
             }else{
-                threadlist.add(new ThreadSeeker(ipaddress,i*range,range, queue, total));
+                threadlist.add(new ThreadSeeker(ipaddress,i*range,range, queue, ocurrencesCount));
             }
         }
         
@@ -60,12 +59,11 @@ public class HostBlackListsValidator {
             i.join();
         }
         for(ThreadSeeker i:threadlist){
-            ocurrencesCount += i.getOcurrencesCount();
             checkedListsCount += i.getCheckedListsCount();
             blackListOcurrences.addAll(i.getBlackListOcurrences());
         }
         
-        if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
+        if (ocurrencesCount.get()>=BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);
         }
         else{
