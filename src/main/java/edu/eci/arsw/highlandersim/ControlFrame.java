@@ -122,6 +122,8 @@ public class ControlFrame extends JFrame {
                     }
             }
         });
+        
+        
 
         toolBar.add(btnResume);
 
@@ -135,6 +137,14 @@ public class ControlFrame extends JFrame {
 
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
+        btnStop.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                for (Immortal im : immortals) {
+                    im.parar();
+                }
+                btnStart.setEnabled(true);
+            }        
+        });
         toolBar.add(btnStop);
 
         scrollPane = new JScrollPane();

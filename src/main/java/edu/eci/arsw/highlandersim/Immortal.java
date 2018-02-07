@@ -55,6 +55,7 @@ public class Immortal extends Thread {
         synchronized(lock){
             lock.notifyAll();
         }
+        isPaused = true;
     }
     
     public void run() {
@@ -93,6 +94,8 @@ public class Immortal extends Thread {
     }
 
     public void fight(Immortal i2) {
+        synchronized(immortalsPopulation){
+        
         if (i2.getHealth() > 0) {
             i2.changeHealth(i2.getHealth() - defaultDamageValue);
             this.health += defaultDamageValue;
@@ -100,8 +103,9 @@ public class Immortal extends Thread {
         } else {
             updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
         }
-
+        }
     }
+    
 
     public void changeHealth(int v) {
         health = v;
